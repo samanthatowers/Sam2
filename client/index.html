@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patients</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>Patients</h1>
+  <ul id="patient-list"></ul>
+<script>
+fetch('/api/patients')
+  .then(r => r.json())
+  .then(data => {
+    const list = document.getElementById('patient-list');
+    data.forEach(p => {
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="patient.html?id=${p.id}">${p.name}</a>`;
+      list.appendChild(li);
+    });
+  });
+</script>
+</body>
+</html>
