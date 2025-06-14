@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Details</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    section { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <a href="index.html">&larr; Back to list</a>
+  <h1 id="name"></h1>
+
+  <section>
+    <h2>PRN Medications</h2>
+    <ul id="prn"></ul>
+    <input type="text" id="prn-input" placeholder="Medication">
+    <button onclick="addMedication('prn')">Add</button>
+  </section>
+
+  <section>
+    <h2>Scheduled Medications</h2>
+    <ul id="scheduled"></ul>
+    <input type="text" id="sched-input" placeholder="Medication">
+    <button onclick="addMedication('scheduled')">Add</button>
+  </section>
+
+  <section>
+    <h2>Doctor Notes</h2>
+    <textarea id="notes" rows="4" cols="50"></textarea><br>
+    <button onclick="saveNotes()">Save</button>
+  </section>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id');
+
+function load() {
+  fetch(`/api/patients/${id}`)
+    .then(r => r.json())
+    .then(p => {
+      document.getElementById('name').textContent = p.name;
+      const prnList = document.getElementById('prn');
+      prnList.innerHTML = '';
+      p.prn.forEach(m => {
+        const li = document.createElement('li');
+        li.textContent = m;
+        prnList.appendChild(li);
+      });
+      const schedList = document.getElementById('scheduled');
+      schedList.innerHTML = '';
+      p.scheduled.forEach(m => {
+        const li = document.createElement('li');
+        li.textContent = m;
+        schedList.appendChild(li);
+      });
+      document.getElementById('notes').value = p.notes;
+    });
+}
+
+function addMedication(type) {
+  const input = type === 'prn' ? document.getElementById('prn-input') : document.getElementById('sched-input');
+  fetch(`/api/patients/${id}/medications`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: type, medication: input.value })
+  }).then(() => { input.value=''; load(); });
+}
+
+function saveNotes() {
+  const notes = document.getElementById('notes').value;
+  fetch(`/api/patients/${id}/notes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notes })
+  }).then(load);
+}
+
+load();
+</script>
+</body>
+</html>
